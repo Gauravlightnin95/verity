@@ -1,0 +1,45 @@
+{
+  "label": "MISLEADING",
+  "confidence": 0.71,
+  "per_claim": [
+    {"claim_id": "c1", "label": "TRUE", "supporting": 3, "refuting": 0},
+    {"claim_id": "c2", "label": "FALSE", "supporting": 0, "refuting": 2}
+  ],
+  "evidence_citations": [
+    {
+      "evidence_id": "e1",
+      "claim_id": "c1",
+      "snippet": "The ministry confirmed on Monday that...",
+      "url": "https://pib.gov.in/example",
+      "source_name": "PIB Fact Check",
+      "source_tier": 1,
+      "retrieved_at": "2026-07-14T10:22:00Z"
+    }
+  ],
+  "signals": [
+    {
+      "name": "evidence_stance",
+      "score": 0.62,
+      "weight": 0.45,
+      "note": "3 snippets support, 2 refute across claims"
+    },
+    {
+      "name": "ai_text",
+      "score": 0.58,
+      "weight": 0.15,
+      "note": "stylistic signal only - detectors can be wrong"
+    }
+  ],
+  "caveats": [
+    "Image checks skipped: text input",
+    "Claim c3 unverifiable: no coverage found"
+  ],
+  "checks_performed": [
+    {
+      "agent_name": "retrieval",
+      "status": "ok",
+      "duration_ms": 2140,
+      "note": "12 evidence items, 4 from cache"
+    }
+  ]
+}

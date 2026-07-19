@@ -1,0 +1,16 @@
+[
+  {
+    "name": "halftone",
+    "score": 0.18,
+    "weight": 0.10,
+    "note": "no print dot pattern found - image likely made digitally",
+    "extras": {"has_print_artifacts": false}
+  },
+  {
+    "name": "masthead_match",
+    "score": 0.35,
+    "weight": 0.05,
+    "note": "closest match 'The Daily Example', similarity 0.35 - below 0.7 threshold",
+    "extras": {"publication_guess": "The Daily Example"}
+  }
+]

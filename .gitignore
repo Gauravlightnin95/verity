@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+data/cache/
+data/mastheads/
+ml/models/
+logs/
+.ruff_cache/
+CLAUDE.md
+.claude/

@@ -1,0 +1,32 @@
+{
+  "regions": [
+    {
+      "region_type": "masthead",
+      "text": "The Daily Example",
+      "confidence": 0.96,
+      "bbox": [40, 22, 980, 110]
+    },
+    {
+      "region_type": "dateline",
+      "text": "New Delhi | 12 July 2026",
+      "confidence": 0.91,
+      "bbox": [40, 118, 420, 150]
+    },
+    {
+      "region_type": "headline",
+      "text": "City Approves New Metro Line",
+      "confidence": 0.94,
+      "bbox": [40, 160, 980, 230]
+    },
+    {
+      "region_type": "body",
+      "text": "The municipal corporation on Friday...",
+      "confidence": 0.88,
+      "bbox": [40, 240, 500, 900]
+    }
+  ],
+  "full_text": "The Daily Example New Delhi | 12 July 2026 City Approves New Metro Line The municipal corporation on Friday...",
+  "language": "en",
+  "device_used": "NPU",
+  "duration_ms": 1840
+}

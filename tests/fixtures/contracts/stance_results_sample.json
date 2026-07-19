@@ -1,0 +1,14 @@
+[
+  {
+    "claim_id": "c1",
+    "evidence_id": "e1",
+    "stance": "SUPPORTS",
+    "rationale": "Snippet 1 reports the same approval and the same date"
+  },
+  {
+    "claim_id": "c1",
+    "evidence_id": "e4",
+    "stance": "NEUTRAL",
+    "rationale": "Snippet 4 discusses the metro but not the approval"
+  }
+]
