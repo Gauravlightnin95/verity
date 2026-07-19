@@ -1,0 +1,29 @@
+[
+  {
+    "claim_id": "c1",
+    "text": "The government's new education policy is a step in the right direction",
+    "entities": ["government", "education policy"],
+    "location": null,
+    "event_date": null,
+    "checkability": "low",
+    "genre": "opinion"
+  },
+  {
+    "claim_id": "c2",
+    "text": "Critics who oppose the policy are simply resistant to change",
+    "entities": ["critics"],
+    "location": null,
+    "event_date": null,
+    "checkability": "low",
+    "genre": "opinion"
+  },
+  {
+    "claim_id": "c3",
+    "text": "Similar reforms in other states saw enrollment rise within two years",
+    "entities": ["other states"],
+    "location": null,
+    "event_date": null,
+    "checkability": "low",
+    "genre": "opinion"
+  }
+]

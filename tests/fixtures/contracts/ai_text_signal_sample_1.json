@@ -1,0 +1,10 @@
+{
+  "name": "ai_text",
+  "score": 0.5,
+  "weight": 0.0,
+  "note": "Text has 42 words, below the minimum of 150 required to score reliably. stylistic signal only - AI-text detectors have known false-positive rates and cannot prove authorship.",
+  "extras": {
+    "word_count": 42,
+    "refused": true
+  }
+}
