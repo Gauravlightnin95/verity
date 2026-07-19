@@ -1,0 +1,20 @@
+[
+  {
+    "claim_id": "c1",
+    "text": "The municipal corporation approved a new metro line on 11 July 2026",
+    "entities": ["municipal corporation", "metro line"],
+    "location": "New Delhi",
+    "event_date": "2026-07-11",
+    "checkability": "high",
+    "genre": "report"
+  },
+  {
+    "claim_id": "c2",
+    "text": "The project will be completed within 18 months",
+    "entities": ["metro line"],
+    "location": "New Delhi",
+    "event_date": null,
+    "checkability": "medium",
+    "genre": "report"
+  }
+]

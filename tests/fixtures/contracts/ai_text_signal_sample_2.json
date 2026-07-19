@@ -1,0 +1,13 @@
+{
+  "name": "ai_text",
+  "score": 0.58,
+  "weight": 0.15,
+  "note": "stylistic signal only - AI-text detectors have known false-positive rates and cannot prove authorship. (method: local classifier + statistical clues)",
+  "extras": {
+    "word_count": 312,
+    "perplexity": 34.7,
+    "burstiness": 0.28,
+    "classifier_probability": 0.63,
+    "method": "local classifier + statistical clues"
+  }
+}

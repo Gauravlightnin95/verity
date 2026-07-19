@@ -1,0 +1,26 @@
+[
+  {
+    "claim_id": "c1",
+    "evidence_id": "e1",
+    "stance": "SUPPORTS",
+    "rationale": "Snippet 1 reports the same approval and the same date"
+  },
+  {
+    "claim_id": "c1",
+    "evidence_id": "e2",
+    "stance": "SUPPORTS",
+    "rationale": "Snippet 2 independently confirms the metro line was approved"
+  },
+  {
+    "claim_id": "c1",
+    "evidence_id": "e3",
+    "stance": "REFUTES",
+    "rationale": "Snippet 3 states the proposal was rejected, contradicting the claim"
+  },
+  {
+    "claim_id": "c1",
+    "evidence_id": "e4",
+    "stance": "NEUTRAL",
+    "rationale": "Snippet 4 discusses the metro line but not its approval status"
+  }
+]

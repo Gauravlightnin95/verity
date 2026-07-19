@@ -1,0 +1,20 @@
+[
+  {
+    "claim_id": "c3",
+    "evidence_id": "e9",
+    "stance": "NEUTRAL",
+    "rationale": "Snippet 1 covers the same event but does not mention the completion timeline"
+  },
+  {
+    "claim_id": "c3",
+    "evidence_id": "e10",
+    "stance": "NEUTRAL",
+    "rationale": "Snippet 2 is a general project overview with no date commitment"
+  },
+  {
+    "claim_id": "c3",
+    "evidence_id": "e11",
+    "stance": "NEUTRAL",
+    "rationale": "No stance returned by model; defaulted to NEUTRAL."
+  }
+]
