@@ -1,0 +1,234 @@
+# VERITY
+
+**Verification Engine for Real-time Integrity of Textual & Visual news** —
+an agentic news-verification system. Give it pasted text, a URL, or a
+photo of a print newspaper clipping; it returns a graded, evidence-cited
+verdict — never a bare TRUE/FALSE.
+
+```
+USER INPUT (text / url / photo)
+  -> Intake Router          classify input, detect language, reject non-news
+  -> Ingestion               URL -> scraper | photo -> OCR + image forensics
+  -> Claim Extraction        LLM: decompose into <=5 atomic checkable claims
+  -> Evidence Retrieval      parallel fan-out: DuckDuckGo (keyless), Tavily, Google Fact Check, GNews, archive probe
+  -> Analysis (parallel)     stance detection, source credibility, AI-text, temporal
+  -> Judge / Fusion          weighted signal fusion -> graded verdict + confidence + citations
+  -> Report Renderer         Streamlit card + PDF export
+```
+
+No single model decides truth. Narrow agents each emit a weighted
+`Signal`; `core/fusion.py` combines them deterministically into a
+`Verdict`, and an LLM judge writes the human-readable explanation without
+being allowed to contradict it.
+
+## Quick start
+
+```
+uv sync                                    # install deps (no ML downloads by default)
+copy .env.example .env                     # your local config (gitignored)
+uv run pytest                              # 87 tests, all green, zero API keys required
+uv run uvicorn app.main:app --reload       # start the backend on :8000
+```
+
+In another shell, start the UI:
+
+```
+uv run streamlit run ui/streamlit_app.py   # opens on :8501, talks to the backend above
+```
+
+The only key you really need is `GROQ_API_KEY` (free tier at
+[console.groq.com](https://console.groq.com/keys)) — it powers claim
+extraction, stance judging, and the verdict write-up. **Web search works
+with no key at all** via DuckDuckGo, so evidence retrieval runs
+out-of-the-box; `TAVILY_API_KEY` / `GNEWS_API_KEY` / `GOOGLE_FACTCHECK_API_KEY`
+are optional bonus providers. Every capability degrades gracefully without
+its key — it never crashes the pipeline. With zero keys the system still
+returns a schema-valid verdict (typically `UNVERIFIABLE`, with `caveats`
+explaining exactly what was skipped).
+
+## How to check a real news claim
+
+**Streamlit UI (recommended)** — open `http://localhost:8501`, pick a tab:
+
+- **Paste text**: drop in an article or a claim, click Check.
+- **Paste URL**: drop in a link, click Check.
+- **Upload photo**: upload a photo of a newspaper clipping (PNG/JPG), click Check.
+
+Each returns a color-coded verdict badge, a per-claim breakdown with
+evidence links, a "what we checked" transparency panel, and (for photos)
+an "is this clipping genuine?" forensics panel — plus a PDF download.
+
+**API directly** (what the UI calls under the hood):
+
+```
+curl -X POST http://localhost:8000/verify -F text="The city approved a new metro line on 11 July 2026."
+curl -X POST http://localhost:8000/verify -F url="https://example.com/some-article"
+curl -X POST http://localhost:8000/verify -F image=@clipping.png
+curl http://localhost:8000/health
+```
+
+Every response is one `Verdict` JSON object:
+
+| Field | Meaning |
+|---|---|
+| `label` | `TRUE / MOSTLY_TRUE / MIXED / MISLEADING / FALSE / UNVERIFIABLE / SATIRE_OPINION` |
+| `confidence` | 0-1, how strongly the evidence agrees (not "how true") |
+| `per_claim` | Each extracted claim's own label + supporting/refuting counts |
+| `evidence_citations` | Every source the verdict is allowed to rely on |
+| `signals` | The individual weighted clues fusion combined (credibility, forensics, ai_text, ...) |
+| `caveats` | Skipped checks, low-confidence signals, unverified claims |
+| `checks_performed` | Full transparency trail: which agent ran, how long, ok/skipped/failed |
+
+## Architecture
+
+Wired as a **LangGraph** `StateGraph` (`agents/graph.py`) over a shared
+state object — each node reads what it needs, calls one capability
+function, and writes the result back, wrapped in try/except so one
+failing capability degrades the verdict instead of crashing the pipeline.
+Every node is async; a shared dispatch helper awaits real async calls
+(evidence retrieval) directly and runs sync calls (OCR, forensics, the
+LLM agents) in a worker thread, so nothing blocks the event loop.
+
+```
+app/            FastAPI entrypoint, config, POST /verify + GET /health
+agents/         one module per pipeline stage + graph.py (LangGraph wiring)
+core/           schemas.py (frozen Pydantic contracts), fusion.py (verdict math), prompts.py (every LLM prompt)
+ml/             openvino_runtime.py (NPU/GPU/CPU model loader)
+forensics/      ela.py, copymove.py, halftone.py, masthead.py - pure OpenCV
+data/           publications.json (25-outlet trust registry)
+ui/             streamlit_app.py (demo frontend)
+tests/          test_*.py + fixtures/ (sample clippings, contract JSON)
+utils/          logging_conf.py (structured logging)
+```
+
+## Fusion weights
+
+| Signal | Weight |
+|---|---|
+| Evidence stance | 45% |
+| Archive/e-paper match | 15% |
+| Source credibility | 10% |
+| Image forensics (ELA/copy-move/halftone) | 10% |
+| Masthead match | 5% |
+| AI-text detector | 15% max — hard-capped, never decisive alone |
+
+**AI-text detection is deliberately weak-signaled.** It refuses to score
+under 150 words, is capped at 15% fusion weight, and always carries the
+disclaimer: *"stylistic signal only — AI-text detectors have known
+false-positive rates and cannot prove authorship."*
+
+**`UNVERIFIABLE` is a first-class, neutral outcome.** Offline/regional
+journalism is systematically under-indexed — absence of evidence is never
+scored as `FALSE`.
+
+## Hardware (Intel Core Ultra 7 258V / Arc 140V iGPU / NPU / 32GB LPDDR5X)
+
+- `ml/openvino_runtime.py`'s `ModelManager` selects devices in priority
+  order **NPU → GPU → CPU**, catching unavailable-device errors and
+  falling through — correct as shipped for this chip, and safe on any
+  CPU-only machine too.
+- OpenCV's own OpenCL backend is explicitly disabled
+  (`cv2.ocl.setUseOpenCL(False)`, in `forensics/__init__.py` and
+  `agents/ocr_agent.py`) — forensics/OCR run on modest single images, not
+  video, so OpenCL bought nothing here and had a reproducible teardown
+  crash on this machine's iGPU driver stack once `openvino` was also
+  installed. Fixing it was a one-line, zero-behavior-change call.
+- **OCR runs on RapidOCR's default CPU execution provider, not
+  OpenVINO, by design for now.** Real NPU/iGPU-accelerated OCR needs the
+  `onnxruntime-openvino` package, which installs a conflicting build of
+  the `onnxruntime` import namespace RapidOCR already depends on.
+  Getting both to coexist means isolating OCR into its own environment,
+  or converting RapidOCR's ONNX models to OpenVINO IR and running them
+  through `ModelManager` directly instead of RapidOCR's own session —
+  real engineering work, deliberately out of scope for this pass. OCR is
+  still fast (~1-4s/image) on CPU.
+- **The optional local AI-text classifier stays opt-in.** `transformers`
+  + `torch` (~2-3GB) are in the `local-ai-text` extra, not the default
+  install: `uv sync --extra local-ai-text`, then set `DETECTOR_LOCAL=true`
+  in `.env`. Default is statistics-only (burstiness), no download, no
+  local inference cost.
+- Converting any model to a quantized OpenVINO IR (`ml/convert/`) hasn't
+  been done yet — nothing in the pipeline depends on it; it's genuinely
+  new work, not integration, and is the natural next step if you want a
+  real "runs on the NPU" demo moment beyond the architecture already
+  being in place for it.
+
+## Tech stack
+
+Python 3.11+ • FastAPI + Uvicorn • Pydantic v2 • LangGraph + LangChain
+(`langchain-groq`) • Groq API (Llama 3.3) • DuckDuckGo (`ddgs`, keyless
+search) + Tavily / Google Fact Check Tools / GNews (retrieval) • httpx +
+trafilatura (scraping) • local JSON evidence cache • RapidOCR (onnxruntime) •
+OpenCV / scikit-image / imagehash (forensics) • OpenVINO (local model
+runtime) • Streamlit + ReportLab (UI/PDF) • pytest + pytest-asyncio + respx
+(tests) • uv (dependency management).
+
+## Testing
+
+```
+uv run pytest                 # everything, ~9s, zero API keys/network
+uv run pytest tests/ -k "fusion or forensics"   # a single area
+```
+
+Real network/LLM calls are never made in tests: HTTP is intercepted with
+`respx`, LLM calls are faked at the `_build_chain`/`with_structured_output`
+seam, and `tests/graph_fakes.py` + an autouse `conftest.py` fixture stand
+in for every pipeline capability so `test_graph.py`/`test_api.py` stay
+fast and deterministic while still exercising the real LangGraph wiring.
+
+## Limitations (state these honestly, always)
+
+1. VERITY assists, it does not adjudicate — outputs are evidence
+   summaries with confidence, for human judgment.
+2. AI-text detection is a weak signal, capped at 15% weight, worse on
+   short/translated/regional text.
+3. Offline/local journalism is systematically under-indexed —
+   `UNVERIFIABLE` is neutral, never treated as `FALSE`.
+4. Retrieval bias: search engines over-represent English and large
+   outlets.
+5. Adversarial fragility: a determined forger photographing a
+   laser-printed fake on real newsprint can pass the halftone check.
+6. Uploaded images are processed locally for forensics; only extracted
+   text is sent to cloud APIs.
+
+## Project status: prototype
+
+VERITY is a working **hackathon prototype**, not a finished product. It
+runs end-to-end today — real web search, real image forensics, real LLM
+judging, graded and cited verdicts — but it was built by a four-person
+team on free-tier APIs and a single laptop. Accuracy, coverage, and speed
+will improve as the project gets more resources: paid API tiers remove
+the daily LLM token budget, better search coverage widens the evidence
+pool, and the outlet trust registry (currently 74 hand-curated
+publications) grows with community review.
+
+## Roadmap — where this goes next
+
+**Verification memory (planned).** Today every check starts from zero.
+The next major feature is a persistent claim memory: every verified claim,
+its evidence, and its verdict get stored (claim text embeddings + a local
+vector store), so that
+- a hoax that was debunked once is recognized **instantly** the next time
+  anyone submits a paraphrase of it — no re-retrieval, no LLM cost;
+- verdicts can be **updated over time** as new evidence appears, with a
+  visible history ("this claim was UNVERIFIABLE in July, confirmed FALSE
+  in August");
+- repeated-misinformation patterns (the same fake resurfacing every few
+  months) become detectable and reportable.
+
+**Other planned directions**, roughly in order:
+
+- **NPU-accelerated local models** — the OpenVINO runtime (NPU → GPU →
+  CPU) is already in place; converting the OCR and AI-text models to
+  quantized IR moves them onto the Intel NPU for faster, cooler inference.
+- **Regional-language support** — Hindi/Devanagari OCR and translation
+  before retrieval, so print journalism that only exists in regional
+  languages can be verified first-class.
+- **Richer evidence sources** — dedicated fact-check aggregators, news
+  archives, and e-paper portals alongside the current web search.
+- **WhatsApp/messaging ingress** — meet misinformation where it actually
+  spreads; forward a message to a bot, get a cited verdict back.
+- **Community verification queue** — `UNVERIFIABLE` items get a human
+  review lane, and reviewer verdicts feed back into the claim memory.
+- **Deepfake detection for news photos** — extend the forensics suite
+  beyond print clippings to manipulated photographs themselves.
