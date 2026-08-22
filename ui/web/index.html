@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VERITY — news &amp; clipping fact-checker</title>
+<link rel="stylesheet" href="/ui/styles.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="nav site-header">
+    <div class="nav-brand brand">
+      <span class="brand-mark">VERITY</span>
+      <span class="text-muted brand-sub">News &amp; clipping fact-checker</span>
+    </div>
+    <div class="header-right">
+      <span class="api-state">
+        <span class="api-dot" id="api-dot" data-state="down"></span>
+        <span id="api-state-text">CHECKING API</span>
+      </span>
+      <div class="theme-switch" role="group" aria-label="Colour theme">
+        <button type="button" id="theme-light" aria-pressed="true">Light</button>
+        <button type="button" id="theme-dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <section class="hero">
+      <div>
+        <p class="kicker">Fact check</p>
+        <h1>Check a story<br>before you pass it on.</h1>
+        <p class="hero-lede">Paste text, paste a link, or upload a photo of a newspaper clipping. VERITY extracts the checkable claims, pulls evidence, and shows its working.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="step-num">01</span><span>Submit text, a URL, or a clipping photo</span></div>
+        <div class="step"><span class="step-num">02</span><span>Claims are extracted and matched against sources</span></div>
+        <div class="step"><span class="step-num">03</span><span>A verdict, with every citation it used</span></div>
+      </div>
+    </section>
+
+    <section style="margin-top:clamp(36px,6vw,72px)">
+      <div class="tabs" role="tablist" aria-label="Input type">
+        <button type="button" class="tab" role="tab" id="tab-text"  aria-selected="true"  aria-controls="panel-text">Paste text</button>
+        <button type="button" class="tab" role="tab" id="tab-url"   aria-selected="false" aria-controls="panel-url">Paste URL</button>
+        <button type="button" class="tab" role="tab" id="tab-image" aria-selected="false" aria-controls="panel-image">Upload photo</button>
+      </div>
+
+      <div class="panel-wrap">
+        <div class="field" id="panel-text" role="tabpanel" aria-labelledby="tab-text">
+          <label class="uc-label" for="v-text">Article text</label>
+          <textarea id="v-text" class="input" placeholder="Paste the full text of the article or forwarded message…"></textarea>
+        </div>
+
+        <div class="field" id="panel-url" role="tabpanel" aria-labelledby="tab-url" hidden>
+          <label class="uc-label" for="v-url">Article URL</label>
+          <input id="v-url" class="input" type="url" placeholder="https://">
+          <p class="text-muted" style="font-size:12px;margin:10px 0 0">The page is fetched server-side. Paywalled pages may return partial text.</p>
+        </div>
+
+        <div id="panel-image" role="tabpanel" aria-labelledby="tab-image" hidden>
+          <p class="uc-label" style="margin:0 0 5px;color:color-mix(in srgb,var(--color-text) 70%,transparent)">Clipping photo</p>
+          <div class="dropzone" id="dropzone">
+            <label for="v-file" class="btn btn-secondary" style="cursor:pointer;background:var(--color-bg)">Choose file</label>
+            <input id="v-file" type="file" accept="image/png,image/jpeg" class="visually-hidden">
+            <span id="file-label">No file chosen</span>
+            <span class="text-muted" style="font-size:12px;margin-left:auto">PNG or JPG · drag &amp; drop · OCR runs on-device</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="btn-run">Check this</button>
+          <button type="button" class="btn btn-secondary" id="btn-clear">Clear</button>
+          <span class="text-muted" style="font-size:12px" id="run-hint">Runs the real pipeline — a check takes 15–40s.</span>
+        </div>
+
+        <div class="error-box" id="error-box" hidden></div>
+      </div>
+    </section>
+
+    <section class="section-rule" id="running" hidden>
+      <p class="kicker" style="letter-spacing:0.12em;margin:0 0 16px">Running pipeline</p>
+      <div id="stages"></div>
+    </section>
+
+    <section class="results" id="results" hidden>
+
+      <div class="banner" id="banner" data-tone="none">
+        <div class="banner-grid">
+          <div>
+            <p class="banner-kicker">Verdict</p>
+            <p class="verdict-label" id="verdict-label">—</p>
+          </div>
+          <div>
+            <p class="banner-kicker">Confidence <span id="conf-text"></span></p>
+            <div class="bar-track"><div class="bar-fill" id="bar-fill" style="width:0%"></div></div>
+            <p class="banner-summary" id="summary"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-cols">
+
+        <div>
+          <h2>Claims</h2>
+          <p class="text-muted" style="font-size:13px;margin:0 0 18px" id="claim-count">—</p>
+          <div class="claim-list" id="claims"></div>
+        </div>
+
+        <div class="col-side">
+
+          <div id="ocr-block" hidden>
+            <h2>Text read from the photo</h2>
+            <p class="text-muted" style="font-size:13px;margin:0 0 16px" id="ocr-meta"></p>
+            <pre class="ocr-text" id="ocr-text"></pre>
+          </div>
+
+          <div>
+            <h2 style="margin-bottom:16px">Signals</h2>
+            <table class="table">
+              <thead>
+                <tr><th>Signal</th><th style="width:70px">Score</th><th style="width:70px">Weight</th></tr>
+              </thead>
+              <tbody id="signals"></tbody>
+            </table>
+          </div>
+
+          <div>
+            <h2 style="margin-bottom:16px">What we checked</h2>
+            <div class="check-list" id="checks"></div>
+          </div>
+
+          <div id="caveats-block">
+            <h2 style="margin-bottom:16px">Caveats</h2>
+            <div style="display:grid;gap:10px" id="caveats"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="result-footer">
+        <button type="button" class="btn btn-primary" id="btn-pdf" style="padding:0 22px">Download report as PDF</button>
+        <button type="button" class="btn btn-secondary" id="btn-again" style="padding:0 20px">Check another</button>
+        <span class="text-muted" style="font-size:12px;margin-left:auto">Verdict labels: TRUE · MOSTLY_TRUE · MIXED · MISLEADING · FALSE · UNVERIFIABLE · SATIRE_OPINION</span>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <span class="text-muted" style="font-size:12px">VERITY — news &amp; clipping fact-checker</span>
+    <span class="text-muted" style="font-size:12px">A verdict is a reading of the available evidence, not a certainty.</span>
+  </footer>
+</div>
+
+<script src="/ui/app.js"></script>
+</body>
+</html>

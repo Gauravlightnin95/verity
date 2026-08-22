@@ -20,9 +20,9 @@ inside the test suite, not as shipped production code.
 ```
 uv sync
 copy .env.example .env
-uv run pytest                          # 133 tests, all green, zero API keys needed
-uv run uvicorn app.main:app --reload   # backend on :8000
-uv run streamlit run ui/streamlit_app.py   # UI on :8501, in another shell
+uv run pytest                          # 142 tests, all green, zero API keys needed
+uv run uvicorn app.main:app --reload   # backend + web UI on :8000 -> open http://localhost:8000
+uv run streamlit run ui/streamlit_app.py   # legacy Streamlit UI on :8501 (being retired)
 ```
 
 ```
@@ -51,7 +51,7 @@ log, never crash) — you get back a real, schema-valid `Verdict`, usually
 | Extract claims | `agents/claim_extractor.py` | D |
 | Stance detection | `agents/stance_agent.py` | D |
 | AI-text detection | `agents/ai_text_detector.py` | D |
-| Demo UI | `ui/streamlit_app.py` | D |
+| Demo UI | `ui/web/` (Streamlit version retired) | D |
 | Schemas/fusion/judge/wiring | `core/`, `agents/graph.py`, `agents/judge_agent.py` | A |
 
 If you need to touch one of these: it's real code now, no flag to flip —
@@ -62,9 +62,9 @@ live via `uvicorn` + `curl` per §1.
 
 ## 2. Input & output format
 
-### 2.1 Input — the Streamlit UI, or the API directly
+### 2.1 Input — the web UI, or the API directly
 
-The UI (`ui/streamlit_app.py`) is a thin HTTP client with three tabs
+The UI (`ui/web/`, served at `http://localhost:8000`) is a thin HTTP client with three tabs
 (paste text / paste URL / upload photo) that calls the same endpoint
 below — nothing to choose between, they're the same contract. Calling
 the API directly: `multipart/form-data` with **exactly one** of:

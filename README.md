@@ -13,7 +13,7 @@ USER INPUT (text / url / photo)
   -> Evidence Retrieval      parallel fan-out: DuckDuckGo (keyless), Tavily, Google Fact Check (via Swytchcode), GNews, archive probe
   -> Analysis (parallel)     stance detection, source credibility, AI-text, temporal
   -> Judge / Fusion          weighted signal fusion -> graded verdict + confidence + citations
-  -> Report Renderer         Streamlit card + PDF export
+  -> Report Renderer         web verdict card + PDF export
 ```
 
 No single model decides truth. Narrow agents each emit a weighted
@@ -26,15 +26,20 @@ being allowed to contradict it.
 ```
 uv sync                                    # install deps (no ML downloads by default)
 copy .env.example .env                     # your local config (gitignored)
-uv run pytest                              # 133 tests, all green, zero API keys required
-uv run uvicorn app.main:app --reload       # start the backend on :8000
+uv run pytest                              # 142 tests, all green, zero API keys required
+uv run uvicorn app.main:app --reload       # backend + web UI on :8000
 ```
 
-In another shell, start the UI:
+Then open **http://localhost:8000** — the UI is served by the same
+process, so there is no second command and no second port.
+
+<details>
+<summary>Legacy Streamlit UI (being retired)</summary>
 
 ```
 uv run streamlit run ui/streamlit_app.py   # opens on :8501, talks to the backend above
 ```
+</details>
 
 The only key you really need is `GROQ_API_KEY` (free tier at
 [console.groq.com](https://console.groq.com/keys)) — it powers claim
@@ -48,7 +53,7 @@ explaining exactly what was skipped).
 
 ## How to check a real news claim
 
-**Streamlit UI (recommended)** — open `http://localhost:8501`, pick a tab:
+**Web UI (recommended)** — open `http://localhost:8000`, pick a tab:
 
 - **Paste text**: drop in an article or a claim, click Check.
 - **Paste URL**: drop in a link, click Check.
@@ -64,6 +69,7 @@ an "is this clipping genuine?" forensics panel — plus a PDF download.
 curl -X POST http://localhost:8000/verify -F text="The city approved a new metro line on 11 July 2026."
 curl -X POST http://localhost:8000/verify -F url="https://example.com/some-article"
 curl -X POST http://localhost:8000/verify -F image=@clipping.png
+curl -X POST http://localhost:8000/report -H 'Content-Type: application/json' -d @verdict.json --output report.pdf
 curl http://localhost:8000/health
 ```
 
@@ -96,7 +102,8 @@ core/           schemas.py (frozen Pydantic contracts), fusion.py (verdict math)
 ml/             openvino_runtime.py (NPU/GPU/CPU model loader)
 forensics/      ela.py, copymove.py, halftone.py, masthead.py - pure OpenCV
 data/           publications.json (25-outlet trust registry)
-ui/             streamlit_app.py (demo frontend)
+ui/web/         index.html + styles.css + app.js (the frontend, served at :8000)
+ui/             streamlit_app.py (legacy frontend, being retired)
 tests/          test_*.py + fixtures/ (sample clippings, contract JSON)
 utils/          logging_conf.py (structured logging)
 ```
