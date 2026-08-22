@@ -3135,6 +3135,15 @@ wheels = [
 ]
 
 [[package]]
+name = "swytchcode-runtime"
+version = "1.1.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/e3/34620365bfaec9a40f06886ce2cc983472f2531c34f5b6e135bc265261bd/swytchcode_runtime-1.1.5.tar.gz", hash = "sha256:afdef421b821b7612a3448b2e0340b4764c31dc6dd8c38fe7ad34ad129b5a0b5", size = 26928, upload-time = "2026-08-21T17:30:46.751Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f3/3a/ad02278515c79f4dd961c67fdfcb0b58d916cee28728763d1513e3b72bfd/swytchcode_runtime-1.1.5-py3-none-any.whl", hash = "sha256:2c17757126d289bfd9842d634f6e8d3ad192698c2b0c07f3a1e68c5ae1417ec3", size = 24483, upload-time = "2026-08-21T17:30:45.499Z" },
+]
+
+[[package]]
 name = "sympy"
 version = "1.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3592,6 +3601,7 @@ dependencies = [
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "scipy", version = "1.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "streamlit" },
+    { name = "swytchcode-runtime" },
     { name = "trafilatura" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -3636,6 +3646,7 @@ requires-dist = [
     { name = "scikit-image", specifier = ">=0.24" },
     { name = "scipy", specifier = ">=1.14" },
     { name = "streamlit", specifier = ">=1.38" },
+    { name = "swytchcode-runtime", specifier = ">=1.1.5" },
     { name = "torch", marker = "extra == 'local-ai-text'", specifier = ">=2.5" },
     { name = "trafilatura", specifier = ">=1.12" },
     { name = "transformers", marker = "extra == 'local-ai-text'", specifier = ">=4.46" },

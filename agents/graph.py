@@ -40,8 +40,9 @@ from agents.forensics_agent import run_forensics
 from agents.intake_router import route
 from agents.judge_agent import judge
 from agents.ocr_agent import run_ocr
-from agents.retrieval_agent import retrieve
+from agents.retrieval_agent import FACTCHECK_TOOL, retrieve
 from agents.scraper_agent import scrape
+from agents.swytchcode_client import available as swytchcode_available
 from agents.stance_agent import stance_batch
 from agents.temporal_agent import check_temporal
 from core.fusion import fuse
@@ -162,7 +163,22 @@ async def _node_claim_extractor(state: _GraphState) -> dict:
 
 async def _node_retrieval(state: _GraphState) -> dict:
     result, log = await _timed_call("retrieval", retrieve, state.get("claims", []), state.get("publication_guess"))
-    updates: dict = {"checks_performed": [log]}
+    # A second, purely informational row so the UI's transparency panel shows
+    # whether the Swytchcode execution kernel was actually available for the
+    # providers that route through it - "which checks ran" has to include
+    # "and which execution layer ran them" to be honest.
+    kernel_ok = swytchcode_available()
+    kernel_log = CheckLog(
+        agent_name="swytchcode_kernel",
+        status="ok" if kernel_ok else "skipped",
+        note=(
+            f"evidence providers executed via Swytchcode ({FACTCHECK_TOOL})"
+            if kernel_ok
+            else "kernel unavailable (CLI or .swytchcode/tooling.json missing) - "
+                 "those providers skipped, keyless search unaffected"
+        ),
+    )
+    updates: dict = {"checks_performed": [log, kernel_log]}
     if result is not None:
         updates["evidence"] = result
     return updates

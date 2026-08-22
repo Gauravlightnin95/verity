@@ -10,3 +10,27 @@ logs/
 .ruff_cache/
 CLAUDE.md
 .claude/
+
+# Swytchcode: commit tooling.json (the trusted-tool registry / execution policy)
+# and the fetched integration bundles, so `swytchcode exec` runs offline on any
+# machine that clones this repo. The lockfile is per-machine scratch, and
+# credentials live in ~/.swytchcode/auth.json, never in the project.
+.swytchcode/tooling.json.lock
+.swytchcode/integrations/manifest.json.lock
+
+.swytchcode/workspace.json
+
+# `swytchcode get "Google Other"` is the only way to reach factchecktools, and
+# it fetches all 210 libraries in that project (~37MB, 650 files) to get the one
+# 28KB bundle we use. Commit the bundle we actually execute; leave the rest as a
+# local cache. Re-fetch anytime with the same command - nothing here is unique.
+.swytchcode/integrations/Google Other/*
+!.swytchcode/integrations/Google Other/factchecktools/
+.swytchcode/integrations/Stripe/
+
+# Screen recordings / demo captures - keep them out of git entirely.
+# GitHub hard-rejects any file over 100MB, and these are 60-165MB each.
+*.mp4
+*.mov
+*.avi
+*.mkv

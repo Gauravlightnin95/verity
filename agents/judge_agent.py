@@ -37,9 +37,19 @@ class _JudgeNotes(BaseModel):
 def _build_chain(model_name: str):
     from langchain_groq import ChatGroq
 
+    # method="json_schema" is load-bearing, not decoration. LangChain's default
+    # ("function_calling") makes Groq's gpt-oss models answer JUDGE_PROMPT with
+    # a call to a tool literally named "json", which Groq rejects:
+    #   Tool call validation failed: attempted to call tool 'json'
+    #   which was not in request.tools
+    # The generated arguments are correct - only the tool name is wrong - so
+    # the judge failed on every single run and silently fell back to the
+    # unpolished fusion verdict. "json_mode" fails differently (it requires
+    # the word JSON in the messages). Measured over repeated runs against the
+    # real prompt: json_schema 3/3, json_mode 0/3, function_calling 0/3.
     return ChatGroq(
         model=model_name, api_key=settings.groq_api_key, temperature=0
-    ).with_structured_output(_JudgeNotes)
+    ).with_structured_output(_JudgeNotes, method="json_schema")
 
 
 def _fallback(fusion_verdict: Verdict, reason: str, status: str = "failed") -> Verdict:

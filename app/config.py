@@ -32,12 +32,28 @@ class Settings(BaseSettings):
     gnews_api_key: str | None = None
     google_factcheck_api_key: str | None = None
 
+    # Swytchcode execution kernel (agents/swytchcode_client.py). The token is
+    # only needed for registry features (`swytchcode get`); `swytchcode exec`
+    # runs offline against the committed .swytchcode/ bundles, so leaving this
+    # empty degrades nothing at verify time. swytchcode_dry_run=True makes every
+    # kernel call report the request it *would* have made without issuing it -
+    # useful for demoing the execution-policy layer without burning API quota.
+    swytchcode_token: str | None = None
+    swytchcode_dry_run: bool = False
+
     # Groq free tier via console.groq.com - fast, no card required. The
     # pipeline makes only ~4 LLM calls per verify (batched stance), so the
     # free 30-req/min limit is comfortable. If you hit the per-minute token
-    # limit, "llama-3.1-8b-instant" has higher throughput (lower quality).
-    # Verify the id at console.groq.com/docs/models if it ever 404s.
-    llm_model: str = "llama-3.3-70b-versatile"
+    # limit, "openai/gpt-oss-20b" has higher throughput (lower quality).
+    #
+    # Groq retires model ids without notice - every Llama chat model was
+    # decommissioned, which surfaces as a 404 "model does not exist" from
+    # claim extraction (not an auth error, so the key is fine). List what a
+    # key can actually reach with:
+    #   curl https://api.groq.com/openai/v1/models -H "Authorization: Bearer $GROQ_API_KEY"
+    # Whatever you pick must support function calling - the three LLM agents
+    # all go through with_structured_output(). qwen/qwen3.6-27b does not.
+    llm_model: str = "openai/gpt-oss-120b"
 
     device_priority: list[str] = ["NPU", "GPU", "CPU"]
 

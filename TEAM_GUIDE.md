@@ -20,7 +20,7 @@ inside the test suite, not as shipped production code.
 ```
 uv sync
 copy .env.example .env
-uv run pytest                          # 87 tests, all green, zero API keys needed
+uv run pytest                          # 133 tests, all green, zero API keys needed
 uv run uvicorn app.main:app --reload   # backend on :8000
 uv run streamlit run ui/streamlit_app.py   # UI on :8501, in another shell
 ```

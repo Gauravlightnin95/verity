@@ -1,0 +1,221 @@
+{
+  "editor": "claude",
+  "integrations": {
+    "Google Other.factchecktools": {
+      "version": "v1alpha1"
+    }
+  },
+  "mode": "production",
+  "tools": {
+    "factchecktools.v1alpha1.claimssearch.list": {
+      "desc": "Search through fact-checked claims.",
+      "inputs": [
+        {
+          "access_token": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "quotaUser": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "prettyPrint": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "BOOL"
+          }
+        },
+        {
+          "alt": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "oauth_token": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "uploadType": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "callback": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "$.xgafv": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "fields": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "key": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "upload_protocol": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "languageCode": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "maxAgeDays": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "INT"
+          }
+        },
+        {
+          "offset": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "INT"
+          }
+        },
+        {
+          "pageSize": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "INT"
+          }
+        },
+        {
+          "pageToken": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "query": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        },
+        {
+          "reviewPublisherSiteFilter": {
+            "LOCATION": "query",
+            "REQUIRED": false,
+            "TYPE": "STRING"
+          }
+        }
+      ],
+      "integration": "Google Other.factchecktools@v1alpha1",
+      "method_hash": "80b713989a844d37861c6acaa0e3254401945532195318e16c8c5e5cf3154501",
+      "output": {
+        "schema": {
+          "properties": {
+            "claims": {
+              "items": {
+                "properties": {
+                  "claimDate": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "claimReview": {
+                    "items": {
+                      "properties": {
+                        "languageCode": {
+                          "required": false,
+                          "type": "string"
+                        },
+                        "publisher": {
+                          "properties": {
+                            "name": {
+                              "required": false,
+                              "type": "string"
+                            },
+                            "site": {
+                              "required": false,
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "reviewDate": {
+                          "required": false,
+                          "type": "string"
+                        },
+                        "textualRating": {
+                          "required": false,
+                          "type": "string"
+                        },
+                        "title": {
+                          "required": false,
+                          "type": "string"
+                        },
+                        "url": {
+                          "required": false,
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "required": false,
+                    "type": "array"
+                  },
+                  "claimant": {
+                    "required": false,
+                    "type": "string"
+                  },
+                  "text": {
+                    "required": false,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "required": false,
+              "type": "array"
+            },
+            "nextPageToken": {
+              "required": false,
+              "type": "string"
+            }
+          }
+        },
+        "status": 200
+      },
+      "summary": "Search through fact-checked claims.",
+      "type": "method"
+    }
+  },
+  "version": "2.20.15"
+}

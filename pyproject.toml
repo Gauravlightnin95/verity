@@ -28,6 +28,7 @@ dependencies = [
     "langdetect>=1.0.9",
     "reportlab>=4.2",
     "python-json-logger>=2.0",
+    "swytchcode-runtime>=1.1.5",
 ]
 
 [project.optional-dependencies]

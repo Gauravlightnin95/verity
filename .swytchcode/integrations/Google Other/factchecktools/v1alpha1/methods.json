@@ -1,0 +1,39 @@
+{
+  "methods": [
+    {
+      "method_uuid": "",
+      "method_name": "Create ClaimReview markup on a page",
+      "canonical_id": "factchecktools.v1alpha1.pages.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete claim review markup on a page",
+      "canonical_id": "factchecktools.v1alpha1.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List claim review pages for a URL or organization",
+      "canonical_id": "factchecktools.v1alpha1.pages.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve claim review markup for a given page",
+      "canonical_id": "factchecktools.v1alpha1.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Search fact-checked claims by query and language",
+      "canonical_id": "factchecktools.v1alpha1.claimssearch.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Search fact-checked claims using an image",
+      "canonical_id": "factchecktools.v1alpha1.claimsimageSearch.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update all ClaimReview markup for a page",
+      "canonical_id": "factchecktools.v1alpha1.update"
+    }
+  ]
+}

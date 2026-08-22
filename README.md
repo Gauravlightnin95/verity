@@ -10,7 +10,7 @@ USER INPUT (text / url / photo)
   -> Intake Router          classify input, detect language, reject non-news
   -> Ingestion               URL -> scraper | photo -> OCR + image forensics
   -> Claim Extraction        LLM: decompose into <=5 atomic checkable claims
-  -> Evidence Retrieval      parallel fan-out: DuckDuckGo (keyless), Tavily, Google Fact Check, GNews, archive probe
+  -> Evidence Retrieval      parallel fan-out: DuckDuckGo (keyless), Tavily, Google Fact Check (via Swytchcode), GNews, archive probe
   -> Analysis (parallel)     stance detection, source credibility, AI-text, temporal
   -> Judge / Fusion          weighted signal fusion -> graded verdict + confidence + citations
   -> Report Renderer         Streamlit card + PDF export
@@ -26,7 +26,7 @@ being allowed to contradict it.
 ```
 uv sync                                    # install deps (no ML downloads by default)
 copy .env.example .env                     # your local config (gitignored)
-uv run pytest                              # 87 tests, all green, zero API keys required
+uv run pytest                              # 133 tests, all green, zero API keys required
 uv run uvicorn app.main:app --reload       # start the backend on :8000
 ```
 
@@ -101,6 +101,64 @@ tests/          test_*.py + fixtures/ (sample clippings, contract JSON)
 utils/          logging_conf.py (structured logging)
 ```
 
+## Swytchcode execution kernel
+
+Evidence providers are API calls, and a fact-checker that loses evidence
+silently is worse than one that fails loudly. The hand-written providers
+unpacked raw JSON positionally (`a["url"]`); when a provider renames a
+field that is a `KeyError`, swallowed by retrieval's broad `except`, and
+the evidence for a claim **silently disappears** — dragging the verdict
+toward `UNVERIFIABLE` with nothing in `checks_performed` to say why.
+
+[Swytchcode](https://www.swytchcode.com/) is an execution kernel for
+agent tool calls: it owns request assembly, schema validation, auth and
+typed error classification, so that same drift surfaces as a categorised
+error instead of an empty list. Google Fact Check Tools runs through it
+via [agents/swytchcode_client.py](agents/swytchcode_client.py) — the only
+place VERITY touches the kernel.
+
+```
+npm install -g swytchcode
+swytchcode login                                          # device-flow OAuth
+swytchcode get "Google Other"                             # fetch the bundle
+swytchcode add factchecktools.v1alpha1.claimssearch.list  # enable it in tooling.json
+```
+
+`get` takes a **project**, not a library. `factchecktools` is a library
+inside the `Google Other` project, so `swytchcode get factchecktools`
+fails with "may not have published bundles yet" — misleading, but it just
+means the name isn't a project. `swytchcode search` lists project names;
+`swytchcode discover "<intent>"` finds the method ids inside them. The
+bundle we execute is committed; the other 210 Google libraries `get`
+pulls down are gitignored as a local cache.
+
+`.swytchcode/tooling.json` is the trusted-tool registry: a tool absent
+from it cannot be executed, no matter what any agent asks for. That
+enforces mechanically what the project constitution otherwise only
+asserts in prose. `swytchcode exec` reads only local files and never
+calls the registry, so once the bundle is committed the kernel runs
+offline; set `SWYTCHCODE_DRY_RUN=true` to have every kernel call report
+the request it *would* make without issuing it.
+
+**It degrades like everything else here.** No CLI installed, no
+`tooling.json`, or a tool not yet enabled — the provider is skipped and
+logged, and the run completes on keyless DuckDuckGo. The transparency
+panel gains a `swytchcode_kernel` row stating which it was.
+
+One sharp edge worth knowing: the CLI **exits 0 for API-level failures**
+(a 4xx means "the call ran and the server answered"), so an auth error
+arrives as a successful exec whose payload happens to be an error
+document. Unwrapping `data` and ignoring the envelope's `status_code` is
+how a `400 API_KEY_INVALID` becomes `{}` becomes "no evidence for this
+claim" — the exact silent loss described above, reintroduced one layer
+down. `swytchcode_client.call()` checks `status_code` and raises, so a
+bad key shows up as a logged skip rather than a quietly thinner verdict.
+
+Tavily, GNews and the Wayback probe stay on raw `httpx`: they are not in
+the Swytchcode registry (checked with `swytchcode discover`), and
+registering a custom OpenAPI spec is a platform-account step rather than
+a CLI one.
+
 ## Fusion weights
 
 | Signal | Weight |
@@ -158,7 +216,8 @@ scored as `FALSE`.
 Python 3.11+ • FastAPI + Uvicorn • Pydantic v2 • LangGraph + LangChain
 (`langchain-groq`) • Groq API (Llama 3.3) • DuckDuckGo (`ddgs`, keyless
 search) + Tavily / Google Fact Check Tools / GNews (retrieval) • httpx +
-trafilatura (scraping) • local JSON evidence cache • RapidOCR (onnxruntime) •
+trafilatura (scraping) • Swytchcode CLI + `swytchcode-runtime` (tool-call execution
+kernel) • local JSON evidence cache • RapidOCR (onnxruntime) •
 OpenCV / scikit-image / imagehash (forensics) • OpenVINO (local model
 runtime) • Streamlit + ReportLab (UI/PDF) • pytest + pytest-asyncio + respx
 (tests) • uv (dependency management).
@@ -172,7 +231,8 @@ uv run pytest tests/ -k "fusion or forensics"   # a single area
 
 Real network/LLM calls are never made in tests: HTTP is intercepted with
 `respx`, LLM calls are faked at the `_build_chain`/`with_structured_output`
-seam, and `tests/graph_fakes.py` + an autouse `conftest.py` fixture stand
+seam, the Swytchcode kernel is faked at `swytchcode_client.call` (no test
+ever spawns the real CLI), and `tests/graph_fakes.py` + an autouse `conftest.py` fixture stand
 in for every pipeline capability so `test_graph.py`/`test_api.py` stay
 fast and deterministic while still exercising the real LangGraph wiring.
 

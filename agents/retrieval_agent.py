@@ -8,6 +8,14 @@ Input: claims (list[Claim]), publication_hint (str | None).
 Output: list[EvidenceItem] (core.schemas). Every provider call must degrade
 (skip + log) rather than raise on a missing key or timeout.
 
+Google Fact Check Tools is executed through the Swytchcode kernel
+(agents/swytchcode_client.py) instead of a hand-written httpx call, so schema
+validation, request assembly and typed error classification belong to the
+execution layer rather than to this module. Tavily, GNews and the Wayback probe
+remain on raw httpx: they are not in the Swytchcode registry (verified with
+`swytchcode discover`), and registering a custom OpenAPI spec is a
+platform-account step rather than a CLI one.
+
 DuckDuckGo needs no API key, so retrieval works out-of-the-box - the other
 providers are pure bonus. The cache is a plain JSON-file-per-claim (keyed by
 claim-text hash): instant, offline-safe, and - unlike the old ChromaDB
@@ -26,10 +34,17 @@ from urllib.parse import urlparse
 
 import httpx
 
+from agents import swytchcode_client
 from app.config import settings
 from core.schemas import Claim, EvidenceItem
 
 log = logging.getLogger("verity.retrieval")
+
+# Swytchcode canonical tool id for Google Fact Check Tools' claims:search.
+# Confirmed present in the Swytchcode registry via `swytchcode discover`; the
+# bundle is fetched with `swytchcode get factchecktools` and enabled with
+# `swytchcode add <id>`, which records it in .swytchcode/tooling.json.
+FACTCHECK_TOOL = "factchecktools.v1alpha1.claimssearch.list"
 
 # Sourced from app.config.settings (loaded from .env), not os.getenv - .env
 # is only ever parsed by pydantic-settings into `settings`, never injected
@@ -127,19 +142,27 @@ def _cache_put(claim_text: str, items: list[EvidenceItem]) -> None:
 async def _with_retry(fn: Callable[..., Awaitable[list[dict]]], *args) -> list[dict]:
     """One attempt + one retry per provider call. A 4xx (bad key, quota, bad
     request) won't fix on an immediate retry, so those raise straight away
-    instead of wasting a second call and more latency."""
+    instead of wasting a second call and more latency.
+
+    For Swytchcode-executed providers we don't have to infer that from a status
+    code: the kernel classifies each failure and says whether it is retryable.
+    Prefer its verdict, and fall back to the status heuristic for the providers
+    still on raw httpx."""
     last_exc: Exception | None = None
     for attempt in range(1 + RETRIES):
         try:
             return await fn(*args)
-        except httpx.HTTPStatusError as exc:
-            if 400 <= exc.response.status_code < 500:
-                raise  # client error - retrying is pointless
-            last_exc = exc
-            log.info("attempt %d failed for %s: %s", attempt + 1, fn.__name__, exc)
         except Exception as exc:
+            retryable = swytchcode_client.is_retryable(exc)
+            if retryable is None and isinstance(exc, httpx.HTTPStatusError):
+                retryable = not (400 <= exc.response.status_code < 500)
+            if retryable is False:
+                raise  # kernel (or 4xx) says a retry is pointless
             last_exc = exc
-            log.info("attempt %d failed for %s: %s", attempt + 1, fn.__name__, exc)
+            log.info(
+                "attempt %d failed for %s: %s",
+                attempt + 1, fn.__name__, swytchcode_client.describe_error(exc),
+            )
     raise last_exc  # caught by asyncio.gather(..., return_exceptions=True)
 
 
@@ -192,16 +215,24 @@ async def _tavily(client: httpx.AsyncClient, claim: Claim) -> list[dict]:
 
 
 async def _factcheck(client: httpx.AsyncClient, claim: Claim) -> list[dict]:
+    """Google Fact Check Tools, executed through the Swytchcode kernel rather
+    than a hand-rolled httpx call. Swytchcode owns request assembly, schema
+    validation and error classification for this provider; VERITY still owns the
+    credential (from .env) and still owns what counts as evidence.
+
+    `client` is unused here - kept in the signature so every provider stays
+    uniform under the asyncio.gather fan-out in _retrieve_one."""
     if not FACTCHECK_KEY:
         log.info("Google Fact Check skipped: no API key")
         return []
-    resp = await client.get(
-        "https://factchecktools.googleapis.com/v1alpha1/claims:search",
-        params={"query": claim.text, "key": FACTCHECK_KEY, "pageSize": 5},
+    payload = await swytchcode_client.call(
+        FACTCHECK_TOOL,
+        {"params": {"query": claim.text, "key": FACTCHECK_KEY, "pageSize": 5}},
     )
-    resp.raise_for_status()
+    if payload is None:  # kernel unavailable - degrade, exactly like a missing key
+        return []
     out = []
-    for c in resp.json().get("claims", []):
+    for c in payload.get("claims", []):
         for review in c.get("claimReview", []):
             out.append({
                 "snippet": f"{c.get('text', '')} - rated '{review.get('textualRating', '?')}'"[:300],
@@ -311,7 +342,14 @@ async def _retrieve_one(claim: Claim, publication_hint: str | None) -> list[Evid
     items: list[EvidenceItem] = []
     for provider, result in zip(("duckduckgo", "tavily", "factcheck", "gnews", "archive"), results):
         if isinstance(result, Exception):
-            log.warning("%s failed for claim %s: %s - skipped", provider, claim.claim_id, result)
+            # describe_error, not the raw exception: a kernel failure carries the
+            # whole of the CLI's stderr, which echoes the outbound request - API
+            # key included - and spans many lines. Logging it verbatim would
+            # write provider secrets into logs/verity.log.
+            log.warning(
+                "%s failed for claim %s: %s - skipped",
+                provider, claim.claim_id, swytchcode_client.describe_error(result),
+            )
             continue
         for i, raw in enumerate(result):
             if not raw.get("url"):

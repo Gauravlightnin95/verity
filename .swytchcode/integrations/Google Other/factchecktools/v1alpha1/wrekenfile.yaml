@@ -1,0 +1,728 @@
+VERSION: 2.0.2
+DEFAULTS:
+  bearer_token: BEARER <ACCESS_TOKEN>
+  w_base_url: https://factchecktools.googleapis.com
+METHODS:
+  factchecktools.v1alpha1.claimsimageSearch.list:
+    SUMMARY: Search through fact-checked claims using an image as the query.
+    DESC: Search through fact-checked claims using an image as the query.
+    HTTP:
+      METHOD: GET
+      ENDPOINT: /v1alpha1/claims:imageSearch
+      HEADERS: {}
+      CONTENT_TYPE: application/json
+      ACCEPT: application/json
+    EXECUTION:
+      KIND: http
+      MODE: sync
+    INPUTS:
+      - access_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - quotaUser:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - prettyPrint:
+          TYPE: BOOL
+          REQUIRED: false
+          LOCATION: query
+      - alt:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - oauth_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - uploadType:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - callback:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - $.xgafv:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - fields:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - key:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - upload_protocol:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - imageUri:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - languageCode:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - offset:
+          TYPE: INT
+          REQUIRED: false
+          LOCATION: query
+      - pageSize:
+          TYPE: INT
+          REQUIRED: false
+          LOCATION: query
+      - pageToken:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+    RETURNS:
+      - RETURNTYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimImageSearchResponse)
+        RETURNVAR: factchecktools_v1alpha1_claimsimageSearch_list
+        STATUS: 200
+    CANONICAL_ID: factchecktools.v1alpha1.claimsimageSearch.list
+  factchecktools.v1alpha1.claimssearch.list:
+    SUMMARY: Search through fact-checked claims.
+    DESC: Search through fact-checked claims.
+    HTTP:
+      METHOD: GET
+      ENDPOINT: /v1alpha1/claims:search
+      HEADERS: {}
+      CONTENT_TYPE: application/json
+      ACCEPT: application/json
+    EXECUTION:
+      KIND: http
+      MODE: sync
+    INPUTS:
+      - access_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - quotaUser:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - prettyPrint:
+          TYPE: BOOL
+          REQUIRED: false
+          LOCATION: query
+      - alt:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - oauth_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - uploadType:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - callback:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - $.xgafv:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - fields:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - key:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - upload_protocol:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - languageCode:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - maxAgeDays:
+          TYPE: INT
+          REQUIRED: false
+          LOCATION: query
+      - offset:
+          TYPE: INT
+          REQUIRED: false
+          LOCATION: query
+      - pageSize:
+          TYPE: INT
+          REQUIRED: false
+          LOCATION: query
+      - pageToken:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - query:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - reviewPublisherSiteFilter:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+    RETURNS:
+      - RETURNTYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimSearchResponse)
+        RETURNVAR: factchecktools_v1alpha1_claimssearch_list
+        STATUS: 200
+    CANONICAL_ID: factchecktools.v1alpha1.claimssearch.list
+  factchecktools.v1alpha1.pages.list:
+    SUMMARY: List the `ClaimReview` markup pages for a specific URL or for an organization.
+    DESC: List the `ClaimReview` markup pages for a specific URL or for an organization.
+    HTTP:
+      METHOD: GET
+      ENDPOINT: /v1alpha1/pages
+      HEADERS:
+        Authorization: bearer_token
+      CONTENT_TYPE: application/json
+      ACCEPT: application/json
+    EXECUTION:
+      KIND: http
+      MODE: sync
+    INPUTS:
+      - access_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - quotaUser:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - prettyPrint:
+          TYPE: BOOL
+          REQUIRED: false
+          LOCATION: query
+      - alt:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - oauth_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - uploadType:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - callback:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - $.xgafv:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - fields:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - key:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - upload_protocol:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - offset:
+          TYPE: INT
+          REQUIRED: false
+          LOCATION: query
+      - organization:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - pageSize:
+          TYPE: INT
+          REQUIRED: false
+          LOCATION: query
+      - pageToken:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - url:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+    RETURNS:
+      - RETURNTYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ListClaimReviewMarkupPagesResponse)
+        RETURNVAR: factchecktools_v1alpha1_pages_list
+        STATUS: 200
+    CANONICAL_ID: factchecktools.v1alpha1.pages.list
+  factchecktools.v1alpha1.pages.create:
+    SUMMARY: Create `ClaimReview` markup on a page.
+    DESC: Create `ClaimReview` markup on a page.
+    HTTP:
+      METHOD: POST
+      ENDPOINT: /v1alpha1/pages
+      HEADERS:
+        Content-Type: application/json
+        Authorization: bearer_token
+      CONTENT_TYPE: application/json
+      ACCEPT: application/json
+      BODY:
+        TYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage)
+    EXECUTION:
+      KIND: http
+      MODE: sync
+    INPUTS:
+      - access_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - quotaUser:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - prettyPrint:
+          TYPE: BOOL
+          REQUIRED: false
+          LOCATION: query
+      - alt:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - oauth_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - uploadType:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - callback:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - $.xgafv:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - fields:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - key:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - upload_protocol:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - body:
+          TYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage)
+          REQUIRED: false
+          LOCATION: body
+    RETURNS:
+      - RETURNTYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage)
+        RETURNVAR: factchecktools_v1alpha1_pages_create
+        STATUS: 200
+    CANONICAL_ID: factchecktools.v1alpha1.pages.create
+  factchecktools.v1alpha1.delete:
+    SUMMARY: Delete all `ClaimReview` markup on a page.
+    DESC: Delete all `ClaimReview` markup on a page.
+    HTTP:
+      METHOD: DELETE
+      ENDPOINT: /v1alpha1/{+name}
+      HEADERS:
+        Authorization: bearer_token
+      CONTENT_TYPE: application/json
+      ACCEPT: application/json
+    EXECUTION:
+      KIND: http
+      MODE: sync
+    INPUTS:
+      - access_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - quotaUser:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - prettyPrint:
+          TYPE: BOOL
+          REQUIRED: false
+          LOCATION: query
+      - alt:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - oauth_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - uploadType:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - callback:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - $.xgafv:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - fields:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - key:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - upload_protocol:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - name:
+          TYPE: STRING
+          LOCATION: path
+    RETURNS:
+      - RETURNTYPE: STRUCT(GoogleProtobufEmpty)
+        RETURNVAR: factchecktools_v1alpha1_delete
+        STATUS: 200
+    CANONICAL_ID: factchecktools.v1alpha1.delete
+  factchecktools.v1alpha1.get:
+    SUMMARY: Get all `ClaimReview` markup on a page.
+    DESC: Get all `ClaimReview` markup on a page.
+    HTTP:
+      METHOD: GET
+      ENDPOINT: /v1alpha1/{+name}
+      HEADERS:
+        Authorization: bearer_token
+      CONTENT_TYPE: application/json
+      ACCEPT: application/json
+    EXECUTION:
+      KIND: http
+      MODE: sync
+    INPUTS:
+      - access_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - quotaUser:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - prettyPrint:
+          TYPE: BOOL
+          REQUIRED: false
+          LOCATION: query
+      - alt:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - oauth_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - uploadType:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - callback:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - $.xgafv:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - fields:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - key:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - upload_protocol:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - name:
+          TYPE: STRING
+          LOCATION: path
+    RETURNS:
+      - RETURNTYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage)
+        RETURNVAR: factchecktools_v1alpha1_get
+        STATUS: 200
+    CANONICAL_ID: factchecktools.v1alpha1.get
+  factchecktools.v1alpha1.update:
+    SUMMARY: Update for all `ClaimReview` markup on a page Note that this is a full update
+    DESC: Update for all `ClaimReview` markup on a page Note that this is a full update. To retain the existing `ClaimReview` markup on a page, first perform a Get operation, then modify the returned markup, and finally call Update with the entire `ClaimReview` markup as the body.
+    HTTP:
+      METHOD: PUT
+      ENDPOINT: /v1alpha1/{+name}
+      HEADERS:
+        Content-Type: application/json
+        Authorization: bearer_token
+      CONTENT_TYPE: application/json
+      ACCEPT: application/json
+      BODY:
+        TYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage)
+    EXECUTION:
+      KIND: http
+      MODE: sync
+    INPUTS:
+      - access_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - quotaUser:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - prettyPrint:
+          TYPE: BOOL
+          REQUIRED: false
+          LOCATION: query
+      - alt:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - oauth_token:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - uploadType:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - callback:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - $.xgafv:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - fields:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - key:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - upload_protocol:
+          TYPE: STRING
+          REQUIRED: false
+          LOCATION: query
+      - name:
+          TYPE: STRING
+          LOCATION: path
+      - body:
+          TYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage)
+          REQUIRED: false
+          LOCATION: body
+    RETURNS:
+      - RETURNTYPE: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage)
+        RETURNVAR: factchecktools_v1alpha1_update
+        STATUS: 200
+    CANONICAL_ID: factchecktools.v1alpha1.update
+STRUCTS:
+  GoogleFactcheckingFactchecktoolsV1alpha1Claim:
+    - name: claimDate
+      type: STRING
+      REQUIRED: false
+      comment: The date that the claim was made.
+    - name: claimReview
+      type: "[]STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReview)"
+      REQUIRED: false
+      comment: One or more reviews of this claim (namely, a fact-checking article).
+    - name: claimant
+      type: STRING
+      REQUIRED: false
+      comment: A person or organization stating the claim. For instance, "John Doe".
+    - name: text
+      type: STRING
+      REQUIRED: false
+      comment: The claim text. For instance, "Crime has doubled in the last 2 years."
+  GoogleFactcheckingFactchecktoolsV1alpha1ClaimReview:
+    - name: languageCode
+      type: STRING
+      REQUIRED: false
+      comment: The language this review was written in. For instance, "en" or "de".
+    - name: publisher
+      type: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1Publisher)
+      REQUIRED: false
+      comment: The publisher of this claim review.
+    - name: reviewDate
+      type: STRING
+      REQUIRED: false
+      comment: The date the claim was reviewed.
+    - name: textualRating
+      type: STRING
+      REQUIRED: false
+      comment: Textual rating. For instance, "Mostly false".
+    - name: title
+      type: STRING
+      REQUIRED: false
+      comment: The title of this claim review, if it can be determined.
+    - name: url
+      type: STRING
+      REQUIRED: false
+      comment: The URL of this claim review.
+  GoogleFactcheckingFactchecktoolsV1alpha1Publisher:
+    - name: name
+      type: STRING
+      REQUIRED: false
+      comment: The name of this publisher. For instance, "Awesome Fact Checks".
+    - name: site
+      type: STRING
+      REQUIRED: false
+      comment: Host-level site name, without the protocol or "www" prefix. For instance, "awesomefactchecks.com". This value of this field is based purely on the claim review URL.
+  GoogleFactcheckingFactchecktoolsV1alpha1ClaimAuthor:
+    - name: imageUrl
+      type: STRING
+      REQUIRED: false
+      comment: Corresponds to `ClaimReview.itemReviewed.author.image`.
+    - name: jobTitle
+      type: STRING
+      REQUIRED: false
+      comment: Corresponds to `ClaimReview.itemReviewed.author.jobTitle`.
+    - name: name
+      type: STRING
+      REQUIRED: false
+      comment: A person or organization stating the claim. For instance, "John Doe". Corresponds to `ClaimReview.itemReviewed.author.name`.
+    - name: sameAs
+      type: STRING
+      REQUIRED: false
+      comment: Corresponds to `ClaimReview.itemReviewed.author.sameAs`.
+  GoogleFactcheckingFactchecktoolsV1alpha1ClaimRating:
+    - name: bestRating
+      type: INT
+      REQUIRED: false
+      comment: For numeric ratings, the best value possible in the scale from worst to best. Corresponds to `ClaimReview.reviewRating.bestRating`.
+    - name: imageUrl
+      type: STRING
+      REQUIRED: false
+      comment: Corresponds to `ClaimReview.reviewRating.image`.
+    - name: ratingExplanation
+      type: STRING
+      REQUIRED: false
+      comment: Corresponds to `ClaimReview.reviewRating.ratingExplanation`.
+    - name: ratingValue
+      type: INT
+      REQUIRED: false
+      comment: A numeric rating of this claim, in the range worstRating — bestRating inclusive. Corresponds to `ClaimReview.reviewRating.ratingValue`.
+    - name: textualRating
+      type: STRING
+      REQUIRED: false
+      comment: The truthfulness rating as a human-readible short word or phrase. Corresponds to `ClaimReview.reviewRating.alternateName`.
+    - name: worstRating
+      type: INT
+      REQUIRED: false
+      comment: For numeric ratings, the worst value possible in the scale from worst to best. Corresponds to `ClaimReview.reviewRating.worstRating`.
+  GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewAuthor:
+    - name: imageUrl
+      type: STRING
+      REQUIRED: false
+      comment: Corresponds to `ClaimReview.author.image`.
+    - name: name
+      type: STRING
+      REQUIRED: false
+      comment: Name of the organization that is publishing the fact check. Corresponds to `ClaimReview.author.name`.
+  GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkup:
+    - name: claimAppearances
+      type: "[]STRING"
+      REQUIRED: false
+      comment: A list of links to works in which this claim appears, aside from the one specified in `claim_first_appearance`. Corresponds to `ClaimReview.itemReviewed[@type=Claim].appearance.url`.
+    - name: claimAuthor
+      type: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimAuthor)
+      REQUIRED: false
+      comment: Info about the author of this claim.
+    - name: claimDate
+      type: STRING
+      REQUIRED: false
+      comment: The date when the claim was made or entered public discourse. Corresponds to `ClaimReview.itemReviewed.datePublished`.
+    - name: claimFirstAppearance
+      type: STRING
+      REQUIRED: false
+      comment: A link to a work in which this claim first appears. Corresponds to `ClaimReview.itemReviewed[@type=Claim].firstAppearance.url`.
+    - name: claimLocation
+      type: STRING
+      REQUIRED: false
+      comment: The location where this claim was made. Corresponds to `ClaimReview.itemReviewed.name`.
+    - name: claimReviewed
+      type: STRING
+      REQUIRED: false
+      comment: A short summary of the claim being evaluated. Corresponds to `ClaimReview.claimReviewed`.
+    - name: rating
+      type: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimRating)
+      REQUIRED: false
+      comment: Info about the rating of this claim review.
+    - name: url
+      type: STRING
+      REQUIRED: false
+      comment: This field is optional, and will default to the page URL. We provide this field to allow you the override the default value, but the only permitted override is the page URL plus an optional anchor link ("page jump"). Corresponds to `ClaimReview.url`
+  GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage:
+    - name: claimReviewAuthor
+      type: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewAuthor)
+      REQUIRED: false
+      comment: Info about the author of this claim review. Similar to the above, semantically these are page-level fields, and each `ClaimReview` on this page will contain the same values.
+    - name: claimReviewMarkups
+      type: "[]STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkup)"
+      REQUIRED: false
+      comment: A list of individual claim reviews for this page. Each item in the list corresponds to one `ClaimReview` element.
+    - name: name
+      type: STRING
+      REQUIRED: false
+      comment: The name of this `ClaimReview` markup page resource, in the form of `pages/{page_id}`. Except for update requests, this field is output-only and should not be set by the user.
+    - name: pageUrl
+      type: STRING
+      REQUIRED: false
+      comment: The URL of the page associated with this `ClaimReview` markup. While every individual `ClaimReview` has its own URL field, semantically this is a page-level field, and each `ClaimReview` on this page will use this value unless individually overridden. Corresponds to `ClaimReview.url`
+    - name: publishDate
+      type: STRING
+      REQUIRED: false
+      comment: The date when the fact check was published. Similar to the URL, semantically this is a page-level field, and each `ClaimReview` on this page will contain the same value. Corresponds to `ClaimReview.datePublished`
+    - name: versionId
+      type: STRING
+      REQUIRED: false
+      comment: The version ID for this markup. Except for update requests, this field is output-only and should not be set by the user.
+  GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimImageSearchResponse:
+    - name: nextPageToken
+      type: STRING
+      REQUIRED: false
+      comment: The next pagination token in the Search response. It should be used as the `page_token` for the following request. An empty value means no more results.
+    - name: results
+      type: "[]STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimImageSearchResponseResult)"
+      REQUIRED: false
+      comment: The list of claims and all of their associated information.
+  GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimImageSearchResponseResult:
+    - name: claim
+      type: STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1Claim)
+      REQUIRED: false
+      comment: A claim which matched the query.
+  GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimSearchResponse:
+    - name: claims
+      type: "[]STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1Claim)"
+      REQUIRED: false
+      comment: The list of claims and all of their associated information.
+    - name: nextPageToken
+      type: STRING
+      REQUIRED: false
+      comment: The next pagination token in the Search response. It should be used as the `page_token` for the following request. An empty value means no more results.
+  GoogleFactcheckingFactchecktoolsV1alpha1ListClaimReviewMarkupPagesResponse:
+    - name: claimReviewMarkupPages
+      type: "[]STRUCT(GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage)"
+      REQUIRED: false
+      comment: The result list of pages of `ClaimReview` markup.
+    - name: nextPageToken
+      type: STRING
+      REQUIRED: false
+      comment: The next pagination token in the Search response. It should be used as the `page_token` for the following request. An empty value means no more results.
