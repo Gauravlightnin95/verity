@@ -10,6 +10,12 @@ no real LLM API call is ever made, and no `respx`/HTTP-level mocking is
 needed for these two agents since they never touch `httpx` directly (that
 plumbing lives inside the `groq`/`langchain-groq` SDKs).
 
+`FakeClaimClassifier` stands in for the check-worthiness classifier
+`ClaimExtractor` runs over every sentence the LLM returns. The real one is
+a Hugging Face pipeline that downloads a model on first use, which would
+break the "fully offline" contract above (and cost ~30s a run), so every
+claim-extraction test injects this instead.
+
 `VerifyClient` (Member D's own HTTP client to Member A's backend) *does*
 talk to httpx directly, so its tests use `respx` instead — see
 `test_streamlit_app.py`.
@@ -63,3 +69,45 @@ class FakeStructuredChatModel:
         if isinstance(result, Exception):
             raise result
         return result
+
+
+@dataclass
+class FakeClaimClassifier:
+    """A stand-in for `agents.claim_extractor`'s check-worthiness
+    classifier: called once per claim, returns one label per call.
+
+    Parameters
+    ----------
+    labels:
+        Labels returned on successive calls. An `Exception` entry is
+        raised instead of returned, simulating a per-sentence failure. If
+        more calls are made than there are entries, the last entry is
+        reused indefinitely — so a single-entry list labels every claim
+        the same way.
+    by_text:
+        Optional exact-text -> label overrides, consulted before `labels`.
+        Use it when a test needs a specific mix of kept and dropped
+        sentences rather than a positional sequence.
+    """
+
+    labels: list[Any] = field(default_factory=lambda: ["Check-worthy Factual"])
+    by_text: dict[str, str] = field(default_factory=dict)
+    seen: list[str] = field(default_factory=list, init=False)
+
+    @property
+    def call_count(self) -> int:
+        return len(self.seen)
+
+    def __call__(self, text: str) -> str:
+        self.seen.append(text)
+
+        if text in self.by_text:
+            return self.by_text[text]
+        if not self.labels:
+            raise AssertionError(f"FakeClaimClassifier has no label for {text!r}")
+
+        index = min(len(self.seen) - 1, len(self.labels) - 1)
+        label = self.labels[index]
+        if isinstance(label, Exception):
+            raise label
+        return label

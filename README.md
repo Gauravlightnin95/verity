@@ -24,9 +24,9 @@ being allowed to contradict it.
 ## Quick start
 
 ```
-uv sync                                    # install deps (no ML downloads by default)
+uv sync                                    # install deps (~2-3GB: torch ships by default now)
 copy .env.example .env                     # your local config (gitignored)
-uv run pytest                              # 142 tests, all green, zero API keys required
+uv run pytest                              # 154 tests, all green, zero API keys required
 uv run uvicorn app.main:app --reload       # backend + web UI on :8000
 ```
 
@@ -207,11 +207,16 @@ scored as `FALSE`.
   through `ModelManager` directly instead of RapidOCR's own session —
   real engineering work, deliberately out of scope for this pass. OCR is
   still fast (~1-4s/image) on CPU.
-- **The optional local AI-text classifier stays opt-in.** `transformers`
-  + `torch` (~2-3GB) are in the `local-ai-text` extra, not the default
-  install: `uv sync --extra local-ai-text`, then set `DETECTOR_LOCAL=true`
-  in `.env`. Default is statistics-only (burstiness), no download, no
-  local inference cost.
+- **`transformers` + `torch` (~2-3GB) are core dependencies**, installed
+  by a plain `uv sync`. They used to sit in an optional `local-ai-text`
+  extra, but the claim extractor's check-worthiness filter runs a local
+  Hugging Face classifier over every extracted sentence, so without them
+  every verify now fails at claim extraction rather than degrading. The
+  extra name is kept as a no-op so the older command still works.
+- **The local AI-text classifier stays opt-in at runtime.** That is a
+  separate switch from the install: `DETECTOR_LOCAL=true` in `.env` turns
+  on GPT-2 perplexity, and the default remains statistics-only
+  (burstiness) with no weights download and no local inference cost.
 - Converting any model to a quantized OpenVINO IR (`ml/convert/`) hasn't
   been done yet — nothing in the pipeline depends on it; it's genuinely
   new work, not integration, and is the natural next step if you want a

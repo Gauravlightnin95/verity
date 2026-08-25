@@ -8,6 +8,10 @@ data/mastheads/
 ml/models/
 logs/
 .ruff_cache/
+
+# Per-run snapshot of every extracted sentence and its check-worthiness
+# label, rewritten by agents/claim_extractor.py on every verify.
+claim.csv
 CLAUDE.md
 .claude/
 
