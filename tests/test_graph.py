@@ -3,7 +3,8 @@ agents). Proves the LangGraph wiring itself - fan-out/fan-in, the
 mock/real resolver, the async dispatch helper, and rejection
 short-circuiting - works correctly."""
 
-from agents.graph import run
+import agents.graph as graph
+from agents.graph import NO_CHECKWORTHY_CLAIMS_MESSAGE, run
 from core.schemas import InputPayload, VerdictLabel
 
 
@@ -41,6 +42,43 @@ async def test_rejected_input_short_circuits_to_unverifiable():
     assert verdict.caveats
     agent_names = {c.agent_name for c in verdict.checks_performed}
     assert "claim_extractor" not in agent_names  # never reached
+
+
+async def test_no_checkworthy_claims_short_circuits_to_unverifiable(monkeypatch):
+    # The whole article was opinion/prediction: extraction worked, the
+    # check-worthiness filter kept nothing.
+    monkeypatch.setattr(graph, "extract_claims", lambda article: [])
+
+    verdict = await run(InputPayload(input_type="text", text="Digital notes are simply better."))
+
+    assert verdict.label == VerdictLabel.UNVERIFIABLE
+    assert verdict.confidence == 0.0
+    assert NO_CHECKWORTHY_CLAIMS_MESSAGE in verdict.caveats
+
+    logs = {c.agent_name: c for c in verdict.checks_performed}
+    assert "retrieval" not in logs  # stopped at claim_extractor
+    assert "fusion" not in logs
+    # No factual claims is a result, not a crash.
+    assert logs["claim_extractor"].status == "ok"
+
+
+async def test_claim_extractor_failure_reports_its_own_reason(monkeypatch):
+    def dead_classifier(article):
+        raise RuntimeError("check-worthiness classifier could not label any claim")
+
+    monkeypatch.setattr(graph, "extract_claims", dead_classifier)
+
+    verdict = await run(InputPayload(input_type="text", text="The city approved a new metro line."))
+
+    assert verdict.label == VerdictLabel.UNVERIFIABLE
+    # A broken classifier must not be reported as "no factual claims" -
+    # that would point the user at the article instead of the install.
+    assert NO_CHECKWORTHY_CLAIMS_MESSAGE not in verdict.caveats
+    assert any("could not label any claim" in caveat for caveat in verdict.caveats)
+
+    logs = {c.agent_name: c for c in verdict.checks_performed}
+    assert logs["claim_extractor"].status == "failed"
+    assert "retrieval" not in logs
 
 
 async def test_zero_api_keys_still_completes_via_judge_fallback(monkeypatch):

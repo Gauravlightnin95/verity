@@ -184,7 +184,7 @@ one-liner if a judge asks.
 | **FFT (Fast Fourier Transform)** | The math behind halftone/print-dot detection — periodic patterns show up as sharp frequency peaks | C |
 | **ELA (Error Level Analysis), copy-move detection** | Classic image-forensics techniques for spotting edits | C |
 | **imagehash / SSIM** | Perceptual image similarity — used for masthead matching | C |
-| **Hugging Face Transformers** | Optional local GPT-2 for perplexity (`uv sync --extra local-ai-text`, `DETECTOR_LOCAL=true`) | D |
+| **Hugging Face Transformers** | Core dependency: the check-worthiness classifier that filters extracted claims, plus optional local GPT-2 for perplexity (`DETECTOR_LOCAL=true`) | D |
 | **Streamlit** | Turns a Python script into a web UI with no HTML/CSS/JS | D |
 
 ### Nice to know (concepts, for confident Q&A)

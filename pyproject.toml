@@ -29,14 +29,19 @@ dependencies = [
     "reportlab>=4.2",
     "python-json-logger>=2.0",
     "swytchcode-runtime>=1.1.5",
-]
-
-[project.optional-dependencies]
-local-ai-text = [
+    # Not optional any more: agents/claim_extractor.py's check-worthiness
+    # filter runs a local Hugging Face classifier on every extracted
+    # sentence, so a plain `uv sync` has to provide it or every verify
+    # fails at claim extraction. ~2-3GB, almost all of it torch.
     "transformers>=4.46",
     "torch>=2.5",
     "huggingface-hub>=0.26",
 ]
+
+[project.optional-dependencies]
+# Retained as a no-op so `uv sync --extra local-ai-text` from older docs
+# still succeeds - the packages it used to carry are core dependencies now.
+local-ai-text = []
 
 [dependency-groups]
 dev = [

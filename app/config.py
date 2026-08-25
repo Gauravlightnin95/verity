@@ -66,7 +66,9 @@ class Settings(BaseSettings):
 
     # AI-text detector. detector_local=False (default) means detect_ai_text()
     # never attempts to load a local model - statistics-only, no download.
-    # Flipping it on requires `uv sync --extra local-ai-text`.
+    # transformers/torch ship with a plain `uv sync` (the claim extractor's
+    # check-worthiness filter needs them), so flipping this on only costs
+    # the GPT-2 weights download, not a dependency install.
     detector_local: bool = False
     detector_model_name: str = "roberta-base-openai-detector"
     detector_min_words: int = 150

@@ -3581,6 +3581,7 @@ dependencies = [
     { name = "ddgs" },
     { name = "fastapi" },
     { name = "httpx" },
+    { name = "huggingface-hub" },
     { name = "imagehash" },
     { name = "langchain-groq" },
     { name = "langdetect" },
@@ -3602,15 +3603,10 @@ dependencies = [
     { name = "scipy", version = "1.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "streamlit" },
     { name = "swytchcode-runtime" },
-    { name = "trafilatura" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.optional-dependencies]
-local-ai-text = [
-    { name = "huggingface-hub" },
     { name = "torch" },
+    { name = "trafilatura" },
     { name = "transformers" },
+    { name = "uvicorn", extra = ["standard"] },
 ]
 
 [package.dev-dependencies]
@@ -3626,7 +3622,7 @@ requires-dist = [
     { name = "ddgs", specifier = ">=6.0" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "httpx", specifier = ">=0.27" },
-    { name = "huggingface-hub", marker = "extra == 'local-ai-text'", specifier = ">=0.26" },
+    { name = "huggingface-hub", specifier = ">=0.26" },
     { name = "imagehash", specifier = ">=4.3" },
     { name = "langchain-groq", specifier = ">=0.2" },
     { name = "langdetect", specifier = ">=1.0.9" },
@@ -3647,9 +3643,9 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.14" },
     { name = "streamlit", specifier = ">=1.38" },
     { name = "swytchcode-runtime", specifier = ">=1.1.5" },
-    { name = "torch", marker = "extra == 'local-ai-text'", specifier = ">=2.5" },
+    { name = "torch", specifier = ">=2.5" },
     { name = "trafilatura", specifier = ">=1.12" },
-    { name = "transformers", marker = "extra == 'local-ai-text'", specifier = ">=4.46" },
+    { name = "transformers", specifier = ">=4.46" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
 ]
 provides-extras = ["local-ai-text"]

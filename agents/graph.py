@@ -6,6 +6,10 @@ Every node is a thin async wrapper: call a capability -> record a CheckLog
 -> write the result back into state. A node's own try/except means one
 failing capability degrades the pipeline instead of crashing it.
 
+Two nodes can end the run early, both through the same reject_reason ->
+END short-circuit: the router (bad input) and claim_extractor (extraction
+failed, or nothing survived the check-worthiness filter).
+
 Every node is async, and every capability call goes through one shared
 dispatch helper (_timed_call / _call_maybe_async) that awaits async
 functions directly and runs sync functions in a worker thread
@@ -58,6 +62,13 @@ from core.schemas import (
     Verdict,
     VerdictLabel,
 )
+
+
+# Set as reject_reason when extraction succeeded but nothing survived the
+# check-worthiness filter - a legitimate outcome, not a malfunction. run()
+# turns any reject_reason into an UNVERIFIABLE verdict carrying it as a
+# caveat, so this string is what the user reads.
+NO_CHECKWORTHY_CLAIMS_MESSAGE = "no factual claims found in the article"
 
 
 async def _call_maybe_async(fn, *args, **kwargs):
@@ -156,8 +167,18 @@ async def _node_claim_extractor(state: _GraphState) -> dict:
         )
     result, log = await _timed_call("claim_extractor", extract_claims, article)
     updates: dict = {"checks_performed": [log], "article": article}
-    if result is not None:
+    # _timed_call swallows exceptions into `log` and returns None, so
+    # without a reject_reason the run would carry on to retrieval and
+    # fusion with an empty claim list. Both terminating cases below reuse
+    # the reject_reason -> END short-circuit, but stay distinct: reporting
+    # "no factual claims" for a broken classifier would point the user at
+    # the article instead of at the install.
+    if result is None:
+        updates["reject_reason"] = log.note or "claim extraction failed"
+    else:
         updates["claims"] = result
+        if not result:
+            updates["reject_reason"] = NO_CHECKWORTHY_CLAIMS_MESSAGE
     return updates
 
 
@@ -256,6 +277,12 @@ def _route_branch(state: _GraphState) -> str:
     return state["input_payload"].input_type  # "text" | "url" | "image"
 
 
+def _route_after_claims(state: _GraphState) -> str:
+    if state.get("reject_reason"):
+        return "rejected"
+    return "retrieval"
+
+
 def build_graph():
     graph = StateGraph(_GraphState)
     graph.add_node("router", _node_router)
@@ -282,7 +309,11 @@ def build_graph():
     graph.add_edge("scraper", "claim_extractor")
     graph.add_edge("ocr", "forensics")
     graph.add_edge("forensics", "claim_extractor")
-    graph.add_edge("claim_extractor", "retrieval")
+    graph.add_conditional_edges(
+        "claim_extractor",
+        _route_after_claims,
+        {"rejected": END, "retrieval": "retrieval"},
+    )
     for analysis_node in ("stance", "credibility", "temporal", "ai_text"):
         graph.add_edge("retrieval", analysis_node)
         graph.add_edge(analysis_node, "fusion")
